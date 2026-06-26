@@ -1,0 +1,72 @@
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Montserrat:wght@400;500;600;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-logo: "Cormorant Garamond", serif;
+  --font-main: "Montserrat", sans-serif;
+  --color-brand-cream: #C4A882; /* Site Background requested by user */
+  --color-brand-rose: #130904;  /* Luxurious deep dark chocolate for high-contrast containers */
+  --color-brand-nude-light: #301a10; /* Elegant dark border */
+  --color-brand-nude: #D4A017; /* Brand gold requested by user */
+  --color-brand-nude-dark: #fcf0ce; /* Readable light champagne gold */
+  --color-brand-chocolate: #D4A017; /* Main gold text requested by user */
+  --color-brand-chocolate-light: #e4d3b2; /* Soft light gold for descriptions inside dark cards */
+  --color-brand-gold: #D4A017; /* Brand gold */
+  --color-brand-gold-light: #fbe69e; /* Light gold highlight */
+  --color-brand-gold-pale: #22120b; /* Dark badge background */
+}
+
+:root {
+  --bg-top: #C4A882;
+  --bg-bottom: #FFFFFF;
+}
+
+body {
+  font-family: var(--font-main);
+  min-height: 100vh;
+  background: linear-gradient(
+    to bottom,
+    var(--bg-top) 0%,
+    #F7E7D8 25%,
+    #FCF7F2 60%,
+    var(--bg-bottom) 100%
+  );
+  background-attachment: fixed;
+  color: var(--color-brand-rose); /* Default text to dark chocolate on the tan body */
+}
+
+/* Custom transitions and scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--color-brand-rose);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-brand-nude);
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-brand-gold-light);
+}
+
+/* Custom shimmer effect mapped to warm luxury gold */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.shimmer-bg {
+  background: linear-gradient(90deg, #130904 25%, #22120b 50%, #130904 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+div#root:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(2) {
+  color: #ffffff;
+}

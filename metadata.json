@@ -1,0 +1,6 @@
+{
+  "name": "Makeup - Tudo por R$10,00",
+  "description": "Loja de maquiagens e produtos de beleza femininos por um preço único de R$ 10,00, com carrinho integrado e finalização direta pelo WhatsApp.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

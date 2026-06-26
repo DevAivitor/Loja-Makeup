@@ -1,0 +1,111 @@
+{
+  "entities": {
+    "Product": {
+      "title": "Product",
+      "description": "A makeup product in the store.",
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "cat": {
+          "type": "string"
+        },
+        "desc": {
+          "type": "string"
+        },
+        "price": {
+          "type": "number"
+        },
+        "img": {
+          "type": "string"
+        },
+        "badge": {
+          "type": "string"
+        }
+      },
+      "required": ["name", "cat", "desc", "price", "img", "badge"]
+    },
+    "Order": {
+      "title": "Order",
+      "description": "An order placed by a customer.",
+      "type": "object",
+      "properties": {
+        "date": {
+          "type": "string"
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "total": {
+          "type": "number"
+        },
+        "status": {
+          "type": "string"
+        }
+      },
+      "required": ["date", "items", "total", "status"]
+    },
+    "StoreSettings": {
+      "title": "StoreSettings",
+      "description": "Settings for the store.",
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "slogan": {
+          "type": "string"
+        },
+        "phone": {
+          "type": "string"
+        },
+        "ig": {
+          "type": "string"
+        },
+        "password": {
+          "type": "string"
+        }
+      },
+      "required": ["name", "slogan", "phone", "ig", "password"]
+    },
+    "Category": {
+      "title": "Category",
+      "description": "A product category.",
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "label": {
+          "type": "string"
+        },
+        "emoji": {
+          "type": "string"
+        }
+      },
+      "required": ["name", "label", "emoji"]
+    }
+  },
+  "firestore": {
+    "products/{productId}": {
+      "schema": "Product",
+      "description": "The products available in the store."
+    },
+    "orders/{orderId}": {
+      "schema": "Order",
+      "description": "Orders placed by customers."
+    },
+    "settings/{settingId}": {
+      "schema": "StoreSettings",
+      "description": "Store settings (usually a single document)."
+    },
+    "categories/{categoryId}": {
+      "schema": "Category",
+      "description": "Product categories."
+    }
+  }
+}

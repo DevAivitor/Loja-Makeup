@@ -1,0 +1,17 @@
+.scroll-float {
+  overflow: visible;
+  display: inline-block;
+  clip-path: polygon(-10% -20%, 110% -20%, 110% 120%, -10% 120%);
+}
+
+.scroll-float-text {
+  display: inline-block;
+  font-size: inherit;
+  font-weight: inherit;
+  text-align: inherit;
+  line-height: inherit;
+}
+
+.char {
+  display: inline-block;
+}
