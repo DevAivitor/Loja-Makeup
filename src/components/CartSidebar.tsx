@@ -59,13 +59,13 @@ export default function CartSidebar({
           />
 
           {/* Drawer container */}
-          <div className="absolute inset-y-0 right-0 max-w-full flex pl-10">
+          <div className="absolute inset-y-0 right-0 max-w-full flex">
             <motion.div
               initial={{ x: '100%' }}
               animate={{ x: 0 }}
               exit={{ x: '100%' }}
               transition={{ type: 'spring', damping: 25, stiffness: 220 }}
-              className="w-screen max-w-md bg-brand-rose flex flex-col shadow-2xl border-l border-brand-nude-light/60"
+              className="cart-drawer w-screen max-w-md bg-brand-rose flex flex-col shadow-2xl border-l border-brand-nude-light/60"
             >
               {/* Cart Drawer Header */}
               <div className="p-6 border-b border-brand-nude-light/60 flex items-center justify-between bg-brand-rose">
@@ -171,7 +171,7 @@ export default function CartSidebar({
               {/* Cart Drawer Footer */}
               {cart.length > 0 && (
                 <div className="p-6 border-t border-brand-nude-light/60 bg-brand-rose/60 space-y-4">
-                  <div className="flex justify-between items-baseline">
+                  <div className="cart-summary flex justify-between items-baseline">
                     <span className="text-xs text-brand-chocolate-light/80 font-bold tracking-wider uppercase">
                       Subtotal
                     </span>
@@ -185,7 +185,7 @@ export default function CartSidebar({
                     </div>
                   </div>
 
-                  <button onClick={handleCheckoutClick} className="font-main font-semibold w-full py-4 bg-brand-gold hover:bg-brand-chocolate text-white rounded-xl text-xs uppercase tracking-widest transition-all duration-300 flex items-center justify-center gap-2.5 shadow-lg shadow-brand-gold/10 hover:shadow-brand-gold/20 hover:-translate-y-0.5 cursor-pointer" >
+                  <button onClick={handleCheckoutClick} className="checkout-btn font-main font-semibold w-full py-4 bg-brand-gold hover:bg-brand-chocolate text-white rounded-xl text-xs uppercase tracking-widest transition-all duration-300 flex items-center justify-center gap-2.5 shadow-lg shadow-brand-gold/10 hover:shadow-brand-gold/20 hover:-translate-y-0.5 cursor-pointer" >
                     <ShoppingBag className="w-4 h-4" /> Finalizar Compra
                   </button>
 
