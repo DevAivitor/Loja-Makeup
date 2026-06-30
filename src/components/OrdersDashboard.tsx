@@ -453,7 +453,7 @@ export default function OrdersDashboard({ orders, onUpdateOrderStatus, settings 
                   <div className="text-sm space-y-2">
                     <p className="text-[#F1E4D3]"><span className="font-medium text-[#CFC3B6]">Telefone:</span> {cust.phone || 'N/A'}</p>
                     <p className="text-[#F1E4D3]"><span className="font-medium text-[#CFC3B6]">CPF:</span> {cust.cpf || 'N/A'}</p>
-                    <p className="text-[#F1E4D3]"><span className="font-medium text-[#CFC3B6]">Email:</span> {cust.email}</p>
+                    <p className="text-[#F1E4D3]"><span className="font-medium text-[#CFC3B6]">Email:</span> {cust.email || 'N/A'}</p>
                   </div>
 
                   <div className="flex items-center gap-3 border-b border-[#D4A017]/20 pb-2 pt-3">
@@ -461,7 +461,7 @@ export default function OrdersDashboard({ orders, onUpdateOrderStatus, settings 
                     <h5 className="text-[11px] font-bold uppercase tracking-widest text-[#D4A017]">Logística & Pagamento</h5>
                   </div>
                   <div className="text-sm space-y-2">
-                    <p className="text-[#F1E4D3]"><span className="font-medium text-[#CFC3B6]">Entrega:</span> {order.deliveryMethod === 'store' ? 'Retirar na Loja' : 'Transportadora/Motoboy'}</p>
+                    <p className="text-[#F1E4D3]"><span className="font-medium text-[#CFC3B6]">Entrega:</span> {order.deliveryType === 'pickup' || order.deliveryMethod === 'store' ? 'Retirar na Loja' : 'Transportadora/Motoboy'}</p>
                     <p className="text-[#F1E4D3]"><span className="font-medium text-[#CFC3B6]">Pagamento:</span> {order.paymentMethod === 'pix' ? 'PIX' : 'Cartão'}</p>
                     {order.paymentId && <p className="text-xs text-[#CFC3B6] mt-1 font-mono bg-black/20 p-2 rounded-lg break-all border border-white/5">ID Ref: {order.paymentId}</p>}
                   </div>
@@ -473,7 +473,7 @@ export default function OrdersDashboard({ orders, onUpdateOrderStatus, settings 
                     <h5 className="text-[11px] font-bold uppercase tracking-widest text-[#D4A017]">Endereço & Entrega</h5>
                   </div>
                   
-                  {!order.address || order.deliveryMethod === 'store' ? (
+                  {!order.address && (order.deliveryType === 'pickup' || order.deliveryMethod === 'store') ? (
                     <div className="text-sm space-y-3 bg-[#2B170F]/50 p-4 rounded-xl border border-[#D4A017]/20 shadow-inner">
                       <div className="inline-flex items-center gap-2 bg-gradient-to-r from-[#D4A017] to-[#F2C94C] px-3 py-1.5 rounded text-[#2B170F] font-bold">
                         <StoreIcon className="w-4 h-4" />
@@ -482,6 +482,7 @@ export default function OrdersDashboard({ orders, onUpdateOrderStatus, settings 
                       <div className="mt-2 space-y-1">
                         <p className="text-[#CFC3B6] text-xs font-bold uppercase tracking-wider">Endereço da Loja:</p>
                         <p className="text-white">Av. Macário Subtil de Oliveira</p>
+                        <p className="text-[#F1E4D3]">Galeria V3</p>
                         <p className="text-[#F1E4D3]">Centro</p>
                         <p className="text-[#F1E4D3]">CEP: 78785-000</p>
                       </div>
@@ -497,12 +498,12 @@ export default function OrdersDashboard({ orders, onUpdateOrderStatus, settings 
                         <span>Entrega via Motoboy</span>
                       </div>
                       <div className="mt-2 space-y-1">
-                        <p className="text-white font-medium">{order.address.street}, {order.address.number}</p>
-                        {order.address.complement && <p className="text-[#F1E4D3]">Complemento: {order.address.complement}</p>}
-                        <p className="text-[#F1E4D3]">Bairro {order.address.neighborhood}</p>
-                        <p className="text-[#F1E4D3]">{order.address.city} - {order.address.state}</p>
-                        <p className="text-[#F1E4D3]">CEP {order.address.cep}</p>
-                        {order.address.reference && <p className="text-[#F1E4D3] text-xs italic opacity-80 mt-1">Ref: {order.address.reference}</p>}
+                        <p className="text-white font-medium">{order.address?.street || 'N/A'}, {order.address?.number || 'N/A'}</p>
+                        {order.address?.complement && <p className="text-[#F1E4D3]">Complemento: {order.address.complement}</p>}
+                        <p className="text-[#F1E4D3]">Bairro: {order.address?.district || order.address?.neighborhood || 'N/A'}</p>
+                        <p className="text-[#F1E4D3]">{order.address?.city || 'N/A'} - {order.address?.state || 'N/A'}</p>
+                        <p className="text-[#F1E4D3]">CEP {order.address?.cep || 'N/A'}</p>
+                        {order.address?.reference && <p className="text-[#F1E4D3] text-xs italic opacity-80 mt-1">Ref: {order.address.reference}</p>}
                       </div>
                       <div className="mt-2 space-y-1 pt-2 border-t border-[#D4A017]/10">
                         <p className="text-[#F1E4D3]"><span className="text-[#CFC3B6] font-medium">Valor do frete:</span> R$ {Number(order.shippingDetails?.price || 0).toFixed(2).replace('.', ',')}</p>
@@ -520,12 +521,12 @@ export default function OrdersDashboard({ orders, onUpdateOrderStatus, settings 
                         {order.shippingDetails?.trackingCode && <p className="text-[#F1E4D3]"><span className="text-[#CFC3B6] font-medium">Rastreio:</span> {order.shippingDetails.trackingCode}</p>}
                       </div>
                       <div className="mt-2 space-y-1 pt-2 border-t border-[#D4A017]/10">
-                        <p className="text-white font-medium">{order.address.street}, {order.address.number}</p>
-                        {order.address.complement && <p className="text-[#F1E4D3]">Complemento: {order.address.complement}</p>}
-                        <p className="text-[#F1E4D3]">Bairro {order.address.neighborhood}</p>
-                        <p className="text-[#F1E4D3]">{order.address.city} - {order.address.state}</p>
-                        <p className="text-[#F1E4D3]">CEP {order.address.cep}</p>
-                        {order.address.reference && <p className="text-[#F1E4D3] text-xs italic opacity-80 mt-1">Ref: {order.address.reference}</p>}
+                        <p className="text-white font-medium">{order.address?.street || 'N/A'}, {order.address?.number || 'N/A'}</p>
+                        {order.address?.complement && <p className="text-[#F1E4D3]">Complemento: {order.address.complement}</p>}
+                        <p className="text-[#F1E4D3]">Bairro: {order.address?.district || order.address?.neighborhood || 'N/A'}</p>
+                        <p className="text-[#F1E4D3]">{order.address?.city || 'N/A'} - {order.address?.state || 'N/A'}</p>
+                        <p className="text-[#F1E4D3]">CEP {order.address?.cep || 'N/A'}</p>
+                        {order.address?.reference && <p className="text-[#F1E4D3] text-xs italic opacity-80 mt-1">Ref: {order.address.reference}</p>}
                       </div>
                       <div className="mt-2 space-y-1 pt-2 border-t border-[#D4A017]/10">
                         <p className="text-[#F1E4D3]"><span className="text-[#CFC3B6] font-medium">Valor do frete:</span> R$ {Number(order.shippingDetails?.price || 0).toFixed(2).replace('.', ',')}</p>

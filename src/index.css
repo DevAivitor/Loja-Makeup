@@ -32,6 +32,26 @@ body {
     padding: 14px 18px;
     border-radius: 16px;
   }
+  
+  .checkout-footer{
+    padding:16px;
+  }
+
+  .checkout-button{
+    width:100%;
+    height:56px;
+    max-height:56px;
+    padding:0 20px;
+    font-size:18px;
+    font-weight:600;
+    border-radius:14px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
 }
 
 @theme {

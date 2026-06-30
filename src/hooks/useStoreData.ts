@@ -157,6 +157,7 @@ export function useStoreData() {
         status: orderData.status,
         customer: orderData.customer || 'Cliente',
         deliveryMethod: orderData.deliveryMethod || 'store',
+        deliveryType: orderData.deliveryType || (orderData.deliveryMethod === 'store' ? 'pickup' : 'delivery'),
         ...(orderData.address && { address: orderData.address }),
         ...(orderData.shippingDetails && { shippingDetails: orderData.shippingDetails }),
         ...(orderData.paymentMethod && { paymentMethod: orderData.paymentMethod })

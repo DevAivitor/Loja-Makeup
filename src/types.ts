@@ -16,6 +16,7 @@ export interface Order {
   status: 'Aguardando Pagamento' | 'Pago' | 'Preparando' | 'Enviado' | 'Entregue' | 'Retirado na Loja' | string;
   customer?: any; // allows string or object
   deliveryMethod?: 'store' | 'delivery' | string;
+  deliveryType?: 'pickup' | 'delivery' | string;
   address?: any;
   shippingDetails?: any;
   paymentMethod?: string;

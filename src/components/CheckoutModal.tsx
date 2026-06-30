@@ -17,7 +17,7 @@ interface CheckoutModalProps {
   onClose: () => void;
   cart: CartItem[];
   total: number;
-  onSuccess: (orderData: { items: string[]; total: number; status: string; customer: any; deliveryMethod: string; address?: any; shippingDetails?: any; paymentMethod?: string }) => void;
+  onSuccess: (orderData: { items: string[]; total: number; status: string; customer: any; deliveryMethod: string; deliveryType?: string; address?: any; shippingDetails?: any; paymentMethod?: string }) => void;
 }
 
 type CheckoutStep = 'customer' | 'method' | 'address' | 'shipping' | 'payment' | 'success';
@@ -200,8 +200,9 @@ export default function CheckoutModal({ isOpen, onClose, cart, total, onSuccess 
         status: 'Aguardando Pagamento',
         customer: { name, email, cpf, phone },
         deliveryMethod: deliveryMethod,
+        deliveryType: deliveryMethod === 'store' ? 'pickup' : 'delivery',
         address: deliveryMethod === 'delivery' ? {
-          cep, street, number, complement, neighborhood, city, state, reference
+          cep, street, number, complement, district: neighborhood, neighborhood, city, state, reference
         } : undefined,
         shippingDetails: deliveryMethod === 'delivery' && selectedShipping ? {
           company: selectedShipping.company?.name || 'Transportadora',
@@ -334,12 +335,6 @@ export default function CheckoutModal({ isOpen, onClose, cart, total, onSuccess 
                       
                       <InputField label="E-mail" type="email" placeholder="seu@email.com" value={email} onChange={(e:any) => setEmail(e.target.value)} />
                     </div>
-
-                    <button disabled={!name || cpf.length < 14 || phone.length < 14 || !email} onClick={() => setStep('method')}
-                      className="w-full py-5 bg-gradient-to-r from-[#D4A017] to-[#F2C94C] hover:brightness-110 text-white rounded-2xl font-bold uppercase tracking-widest transition-all shadow-lg active:scale-[0.98] disabled:opacity-50 disabled:active:scale-100 flex items-center justify-center gap-3 text-lg"
-                    >
-                      Continuar <ArrowRight className="w-5 h-5" />
-                    </button>
                   </motion.div>
                 )}
 
@@ -387,23 +382,6 @@ export default function CheckoutModal({ isOpen, onClose, cart, total, onSuccess 
                         </p>
                       </button>
                     </div>
-
-                    <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center gap-4 pt-4">
-                      <button onClick={() => setStep('customer')} className="px-8 py-5 rounded-2xl font-bold text-[#E6D8C9] hover:text-white hover:bg-white/5 border border-transparent hover:border-white/10 transition-all uppercase tracking-wider text-sm">Voltar</button>
-                      <button onClick={() => {
-                          if (deliveryMethod === 'store') {
-                            setShippingCost(0);
-                            setSelectedShipping(null);
-                            setStep('payment');
-                          } else {
-                            setStep('address');
-                          }
-                        }}
-                        className="flex-1 py-5 bg-gradient-to-r from-[#D4A017] to-[#F2C94C] hover:brightness-110 text-white rounded-2xl font-bold uppercase tracking-widest transition-all shadow-lg active:scale-[0.98] flex items-center justify-center gap-3 text-lg"
-                      >
-                        Continuar <ArrowRight className="w-5 h-5" />
-                      </button>
-                    </div>
                   </motion.div>
                 )}
 
@@ -448,18 +426,6 @@ export default function CheckoutModal({ isOpen, onClose, cart, total, onSuccess 
                       </div>
                       
                       <InputField label="Referência (Opcional)" placeholder="Próximo a..." value={reference} onChange={(e:any) => setReference(e.target.value)} />
-                    </div>
-
-                    <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center gap-4 pt-4">
-                      <button onClick={() => setStep('method')} className="px-8 py-5 rounded-2xl font-bold text-[#E6D8C9] hover:text-white hover:bg-white/5 border border-transparent hover:border-white/10 transition-all uppercase tracking-wider text-sm">Voltar</button>
-                      <button disabled={!cep || !street || !number || !neighborhood || !city || !state} onClick={() => {
-                          loadShippingOptions();
-                          setStep('shipping');
-                        }}
-                        className="flex-1 py-5 bg-gradient-to-r from-[#D4A017] to-[#F2C94C] hover:brightness-110 text-white rounded-2xl font-bold uppercase tracking-widest transition-all shadow-lg active:scale-[0.98] disabled:opacity-50 disabled:active:scale-100 flex items-center justify-center gap-3 text-lg"
-                      >
-                        Ver Fretes <ArrowRight className="w-5 h-5" />
-                      </button>
                     </div>
                   </motion.div>
                 )}
@@ -517,15 +483,6 @@ export default function CheckoutModal({ isOpen, onClose, cart, total, onSuccess 
                         )}
                       </div>
                     )}
-
-                    <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center gap-4 pt-4">
-                      <button onClick={() => setStep('address')} className="px-8 py-5 rounded-2xl font-bold text-[#E6D8C9] hover:text-white hover:bg-white/5 border border-transparent hover:border-white/10 transition-all uppercase tracking-wider text-sm">Voltar</button>
-                      <button disabled={!selectedShipping} onClick={() => setStep('payment')}
-                        className="flex-1 py-5 bg-gradient-to-r from-[#D4A017] to-[#F2C94C] hover:brightness-110 text-white rounded-2xl font-bold uppercase tracking-widest transition-all shadow-lg active:scale-[0.98] disabled:opacity-50 disabled:active:scale-100 flex items-center justify-center gap-3 text-lg"
-                      >
-                        Continuar para Pagamento <ArrowRight className="w-5 h-5" />
-                      </button>
-                    </div>
                   </motion.div>
                 )}
 
@@ -546,15 +503,7 @@ export default function CheckoutModal({ isOpen, onClose, cart, total, onSuccess 
                          <p className="text-lg text-[#E6D8C9] mb-10 max-w-md mx-auto leading-relaxed">
                            Ambiente 100% seguro. Pague com PIX (aprovação instantânea), Cartão de Crédito ou Boleto.
                          </p>
-
-                         <button onClick={handleCheckout} disabled={isProcessing} className="w-full py-6 bg-[#009EE3] hover:bg-[#0089C5] text-white rounded-2xl font-bold uppercase tracking-widest transition-all shadow-[0_10px_30px_rgba(0,158,227,0.3)] hover:shadow-[0_5px_15px_rgba(0,158,227,0.2)] active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-4 text-xl" >
-                            {isProcessing ? <Loader2 className="w-7 h-7 animate-spin" /> : 'Pagar com Mercado Pago'}
-                         </button>
                        </div>
-                    </div>
-
-                    <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center gap-4 pt-4">
-                      <button onClick={() => setStep(deliveryMethod === 'store' ? 'method' : 'shipping')} className="px-8 py-5 rounded-2xl font-bold text-[#E6D8C9] hover:text-white hover:bg-white/5 border border-transparent hover:border-white/10 transition-all uppercase tracking-wider text-sm">Voltar</button>
                     </div>
                   </motion.div>
                 )}
@@ -576,6 +525,71 @@ export default function CheckoutModal({ isOpen, onClose, cart, total, onSuccess 
                 )}
               </AnimatePresence>
             </div>
+            
+            {/* Fixed Footer for Buttons */}
+            {step !== 'success' && (
+              <div className="checkout-footer bg-[#2C1B12] border-t border-white/5 z-20 shrink-0 lg:order-none order-last p-4 sm:p-6 lg:p-8">
+                <div className="max-w-2xl mx-auto flex flex-col-reverse sm:flex-row items-stretch sm:items-center gap-4">
+                  {step === 'customer' && (
+                    <button disabled={!name || cpf.length < 14 || phone.length < 14 || !email} onClick={() => setStep('method')}
+                      className="checkout-button w-full py-5 bg-gradient-to-r from-[#D4A017] to-[#F2C94C] hover:brightness-110 text-white rounded-2xl font-bold uppercase tracking-widest transition-all shadow-lg active:scale-[0.98] disabled:opacity-50 disabled:active:scale-100 flex items-center justify-center gap-3 text-lg"
+                    >
+                      Continuar <ArrowRight className="w-5 h-5" />
+                    </button>
+                  )}
+                  {step === 'method' && (
+                    <>
+                      <button onClick={() => setStep('customer')} className="checkout-button sm:w-auto px-8 py-5 rounded-2xl font-bold text-[#E6D8C9] hover:text-white hover:bg-white/5 border border-transparent hover:border-white/10 transition-all uppercase tracking-wider text-sm">Voltar</button>
+                      <button onClick={() => {
+                          if (deliveryMethod === 'store') {
+                            setShippingCost(0);
+                            setSelectedShipping(null);
+                            setStep('payment');
+                          } else {
+                            setStep('address');
+                          }
+                        }}
+                        className="checkout-button flex-1 py-5 bg-gradient-to-r from-[#D4A017] to-[#F2C94C] hover:brightness-110 text-white rounded-2xl font-bold uppercase tracking-widest transition-all shadow-lg active:scale-[0.98] flex items-center justify-center gap-3 text-lg"
+                      >
+                        Continuar <ArrowRight className="w-5 h-5" />
+                      </button>
+                    </>
+                  )}
+                  {step === 'address' && (
+                    <>
+                      <button onClick={() => setStep('method')} className="checkout-button sm:w-auto px-8 py-5 rounded-2xl font-bold text-[#E6D8C9] hover:text-white hover:bg-white/5 border border-transparent hover:border-white/10 transition-all uppercase tracking-wider text-sm">Voltar</button>
+                      <button disabled={!cep || !street || !number || !neighborhood || !city || !state} onClick={() => {
+                          loadShippingOptions();
+                          setStep('shipping');
+                        }}
+                        className="checkout-button flex-1 py-5 bg-gradient-to-r from-[#D4A017] to-[#F2C94C] hover:brightness-110 text-white rounded-2xl font-bold uppercase tracking-widest transition-all shadow-lg active:scale-[0.98] disabled:opacity-50 disabled:active:scale-100 flex items-center justify-center gap-3 text-lg"
+                      >
+                        Ver Fretes <ArrowRight className="w-5 h-5" />
+                      </button>
+                    </>
+                  )}
+                  {step === 'shipping' && (
+                    <>
+                      <button onClick={() => setStep('address')} className="checkout-button sm:w-auto px-8 py-5 rounded-2xl font-bold text-[#E6D8C9] hover:text-white hover:bg-white/5 border border-transparent hover:border-white/10 transition-all uppercase tracking-wider text-sm">Voltar</button>
+                      <button disabled={!selectedShipping} onClick={() => setStep('payment')}
+                        className="checkout-button flex-1 py-5 bg-gradient-to-r from-[#D4A017] to-[#F2C94C] hover:brightness-110 text-white rounded-2xl font-bold uppercase tracking-widest transition-all shadow-lg active:scale-[0.98] disabled:opacity-50 disabled:active:scale-100 flex items-center justify-center gap-3 text-lg"
+                      >
+                        Continuar <ArrowRight className="w-5 h-5" />
+                      </button>
+                    </>
+                  )}
+                  {step === 'payment' && (
+                    <>
+                      <button onClick={() => setStep(deliveryMethod === 'store' ? 'method' : 'shipping')} className="checkout-button sm:w-auto px-8 py-5 rounded-2xl font-bold text-[#E6D8C9] hover:text-white hover:bg-white/5 border border-transparent hover:border-white/10 transition-all uppercase tracking-wider text-sm">Voltar</button>
+                      <button onClick={handleCheckout} disabled={isProcessing} className="checkout-button flex-1 py-5 bg-[#009EE3] hover:bg-[#0089C5] text-white rounded-2xl font-bold uppercase tracking-widest transition-all shadow-[0_10px_30px_rgba(0,158,227,0.3)] hover:shadow-[0_5px_15px_rgba(0,158,227,0.2)] active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-4 text-lg" >
+                        {isProcessing ? <Loader2 className="w-6 h-6 animate-spin" /> : 'Pagar com Mercado Pago'}
+                      </button>
+                    </>
+                  )}
+                </div>
+              </div>
+            )}
+
           </div>
 
           {/* Premium Summary Sidebar */}
