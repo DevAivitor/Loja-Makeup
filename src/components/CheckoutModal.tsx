@@ -100,7 +100,13 @@ export default function CheckoutModal({ isOpen, onClose, cart, total, onSuccess 
       setIsProcessing(false);
       setShippingCost(0);
       setSelectedShipping(null);
+      document.body.classList.add("modal-open");
+    } else {
+      document.body.classList.remove("modal-open");
     }
+    return () => {
+      document.body.classList.remove("modal-open");
+    };
   }, [isOpen]);
 
   const handleCepLookup = async (cepVal: string) => {
@@ -187,59 +193,40 @@ export default function CheckoutModal({ isOpen, onClose, cart, total, onSuccess 
   const handleCheckout = async () => {
     setIsProcessing(true);
     try {
-      const orderId = String(Date.now());
-      
-      const orderItemsList = cart.map(c => `${c.name} (x${c.qty})`);
-      if (shippingCost > 0) {
-        orderItemsList.push(`Frete: ${selectedShipping?.company?.name || 'Taxa'}`);
+      let deliveryInfo = null;
+      if (deliveryMethod !== 'store') {
+          const isMotoboy = selectedShipping?.id === 'motoboy';
+          deliveryInfo = {
+              type: isMotoboy ? 'motoboy' : 'correios',
+              address: street,
+              number: number,
+              neighborhood: neighborhood,
+              city: city,
+              state: state,
+              zip: cep,
+              ...(!isMotoboy ? { shippingValue: Number(selectedShipping?.price || shippingCost) } : {})
+          };
       }
 
-      onSuccess({
-        items: orderItemsList,
-        total: finalTotal,
-        status: 'Aguardando Pagamento',
-        customer: { name, email, cpf, phone },
-        deliveryMethod: deliveryMethod,
-        deliveryType: deliveryMethod === 'store' ? 'pickup' : 'delivery',
-        address: deliveryMethod === 'delivery' ? {
-          cep, street, number, complement, district: neighborhood, neighborhood, city, state, reference
-        } : undefined,
-        shippingDetails: deliveryMethod === 'delivery' && selectedShipping ? {
-          company: selectedShipping.company?.name || 'Transportadora',
-          price: selectedShipping.price || shippingCost,
-          deliveryTime: selectedShipping.delivery_time || 0
-        } : undefined
-      });
-
-      const mpItems = [...cart];
-      if (shippingCost > 0) {
-        mpItems.push({
-          id: 99999,
-          name: `Frete - ${selectedShipping?.company?.name || 'Entrega'}`,
-          price: shippingCost,
-          qty: 1,
-          cat: 'Frete',
-          desc: 'Taxa de Entrega'
-        });
-      }
-
-      const response = await fetch('/api/checkout/preference', {
+      const response = await fetch('/api/create-order', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          items: mpItems,
-          customer: { name, email },
-          orderId
+          customer: { name, phone, email },
+          delivery: deliveryInfo,
+          items: cart.map(c => ({ name: c.name, quantity: c.qty }))
         })
       });
       
       const data = await response.json();
-      if (data.init_point) {
-        window.open(data.init_point, '_blank');
-        setStep('success');
+      if (data.checkout_url) {
+        window.location.href = data.checkout_url;
+      } else {
+        alert('Ocorreu um erro ao gerar o pagamento. Tente novamente.');
       }
     } catch (error) {
       console.error('Checkout error:', error);
+      alert('Ocorreu um erro ao gerar o pagamento. Tente novamente.');
     } finally {
       setIsProcessing(false);
     }
@@ -258,13 +245,13 @@ export default function CheckoutModal({ isOpen, onClose, cart, total, onSuccess 
   const currentStepIndex = steps.findIndex(s => s.id === step) >= 0 ? steps.findIndex(s => s.id === step) : 5;
 
   return (
-    <div className="fixed inset-0 z-[300] overflow-hidden flex items-center justify-center p-0 sm:p-4 md:p-6 bg-black/60 backdrop-blur-sm">
+    <div className="checkout-modal bg-black/60 backdrop-blur-sm p-0 sm:p-4 md:p-6 justify-center items-center" onWheel={(e) => e.stopPropagation()} onTouchMove={(e) => e.stopPropagation()}>
       <motion.div
         initial={{ scale: 0.98, opacity: 0, y: 10 }}
         animate={{ scale: 1, opacity: 1, y: 0 }}
         exit={{ scale: 0.98, opacity: 0, y: 10 }}
         transition={{ duration: 0.3, ease: "easeOut" }}
-        className="relative w-full max-w-6xl h-full sm:h-auto max-h-full sm:max-h-[90vh] bg-[#2C1B12] sm:rounded-3xl shadow-2xl flex flex-col overflow-hidden"
+        className="relative w-full max-w-6xl h-full sm:h-auto max-h-full sm:max-h-[90vh] bg-[#2C1B12] sm:rounded-3xl shadow-2xl flex flex-col overflow-hidden mx-auto my-auto"
       >
         {/* Elegant Header */}
         <div className="flex items-center justify-between p-6 bg-[#3A261A] shadow-md z-20">
@@ -315,7 +302,7 @@ export default function CheckoutModal({ isOpen, onClose, cart, total, onSuccess 
                </div>
             </div>
 
-            <div className="flex-1 overflow-y-auto p-6 sm:p-10 custom-scrollbar">
+            <div className="checkout-content p-6 sm:p-10 custom-scrollbar">
               <AnimatePresence mode="wait">
                 
                 {step === 'customer' && (
@@ -494,14 +481,14 @@ export default function CheckoutModal({ isOpen, onClose, cart, total, onSuccess 
                     </div>
                     
                     <div className="p-10 rounded-3xl bg-[#3A261A] border border-white/5 shadow-2xl text-center relative overflow-hidden">
-                       <div className="absolute top-0 right-0 w-64 h-64 bg-[#009EE3]/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+                       <div className="absolute top-0 right-0 w-64 h-64 bg-[#D4A017]/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
                        <div className="relative z-10">
-                         <div className="w-24 h-24 bg-white/5 text-[#009EE3] rounded-3xl flex items-center justify-center mx-auto mb-8 border border-white/10 shadow-lg">
+                         <div className="w-24 h-24 bg-white/5 text-[#D4A017] rounded-3xl flex items-center justify-center mx-auto mb-8 border border-white/10 shadow-lg">
                            <CreditCard className="w-12 h-12" />
                          </div>
-                         <h4 className="font-main text-3xl font-bold text-white mb-4">Mercado Pago</h4>
+                         <h4 className="font-main text-3xl font-bold text-white mb-4">Finalizar Pagamento</h4>
                          <p className="text-lg text-[#E6D8C9] mb-10 max-w-md mx-auto leading-relaxed">
-                           Ambiente 100% seguro. Pague com PIX (aprovação instantânea), Cartão de Crédito ou Boleto.
+                           Ambiente 100% seguro. Pague com PIX (aprovação instantânea) ou Cartão de Crédito.
                          </p>
                        </div>
                     </div>
@@ -515,7 +502,7 @@ export default function CheckoutModal({ isOpen, onClose, cart, total, onSuccess 
                     </div>
                     <div>
                       <h3 className="font-main text-5xl font-bold text-white mb-4">Pedido Registrado!</h3>
-                      <p className="text-[#E6D8C9] text-xl">Aguardando a confirmação do pagamento no Mercado Pago.</p>
+                      <p className="text-[#E6D8C9] text-xl">Redirecionando para o pagamento...</p>
                     </div>
 
                     <button onClick={onClose} className="mt-12 px-12 py-6 bg-gradient-to-r from-[#D4A017] to-[#F2C94C] hover:brightness-110 text-white rounded-2xl font-bold uppercase tracking-widest transition-all shadow-xl active:scale-[0.98] text-lg inline-flex">
@@ -581,8 +568,8 @@ export default function CheckoutModal({ isOpen, onClose, cart, total, onSuccess 
                   {step === 'payment' && (
                     <>
                       <button onClick={() => setStep(deliveryMethod === 'store' ? 'method' : 'shipping')} className="checkout-button sm:w-auto px-8 py-5 rounded-2xl font-bold text-[#E6D8C9] hover:text-white hover:bg-white/5 border border-transparent hover:border-white/10 transition-all uppercase tracking-wider text-sm">Voltar</button>
-                      <button onClick={handleCheckout} disabled={isProcessing} className="checkout-button flex-1 py-5 bg-[#009EE3] hover:bg-[#0089C5] text-white rounded-2xl font-bold uppercase tracking-widest transition-all shadow-[0_10px_30px_rgba(0,158,227,0.3)] hover:shadow-[0_5px_15px_rgba(0,158,227,0.2)] active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-4 text-lg" >
-                        {isProcessing ? <Loader2 className="w-6 h-6 animate-spin" /> : 'Pagar com Mercado Pago'}
+                      <button onClick={handleCheckout} disabled={isProcessing} className="checkout-button flex-1 py-5 bg-gradient-to-r from-[#D4A017] to-[#F2C94C] hover:brightness-110 text-white rounded-2xl font-bold uppercase tracking-widest transition-all shadow-lg active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-4 text-lg" >
+                        {isProcessing ? 'Gerando pagamento...' : 'Finalizar Compra'}
                       </button>
                     </>
                   )}
@@ -594,7 +581,7 @@ export default function CheckoutModal({ isOpen, onClose, cart, total, onSuccess 
 
           {/* Premium Summary Sidebar */}
           {step !== 'success' && (
-            <div className="hidden lg:flex flex-col w-[420px] bg-[#3A261A] border-l border-white/5 z-10 shadow-2xl relative">
+            <div className="checkout-summary hidden lg:flex flex-col w-[420px] bg-[#3A261A] border-l border-white/5 z-10 shadow-2xl relative">
                <div className="p-8 border-b border-white/5">
                  <h3 className="font-main font-bold text-2xl text-white">Resumo da Compra</h3>
                </div>

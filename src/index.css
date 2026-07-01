@@ -9,6 +9,36 @@ body {
   overflow-x: hidden;
 }
 
+body.modal-open {
+  overflow: hidden;
+  height: 100vh;
+}
+
+.checkout-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+  z-index: 9999;
+}
+
+.checkout-content {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  height: 100%;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+}
+
+.checkout-summary {
+  overflow-y: auto;
+  height: 100%;
+}
+
 @media (max-width: 768px) {
   .cart-drawer {
     width: 100vw;

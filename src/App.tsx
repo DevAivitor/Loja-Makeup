@@ -69,6 +69,43 @@ export default function App() {
   const [logoClicks, setLogoClicks] = useState(0);
 
   const [isMobile, setIsMobile] = useState(false);
+  const [orderNsu, setOrderNsu] = useState<string | null>(null);
+  const [orderStatus, setOrderStatus] = useState<any>(null);
+  const [isConfirmingPayment, setIsConfirmingPayment] = useState<boolean>(false);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const nsu = params.get('order_nsu');
+    if (nsu) {
+      setOrderNsu(nsu);
+      setIsConfirmingPayment(true);
+      
+      let attempts = 0;
+      const checkStatus = async () => {
+        if (attempts >= 10) {
+          setIsConfirmingPayment(false);
+          setOrderStatus({ status: 'timeout' });
+          return;
+        }
+        try {
+          const res = await fetch(`/api/order-status?order_nsu=${nsu}`);
+          const data = await res.json();
+          if (data.status === 'pago' || data.status === 'approved' || data.status === 'paid' || data.status === 'approved' || data.status === 'authorized') {
+            setOrderStatus(data);
+            setIsConfirmingPayment(false);
+          } else {
+            attempts++;
+            setTimeout(checkStatus, 3000);
+          }
+        } catch (e) {
+          attempts++;
+          setTimeout(checkStatus, 3000);
+        }
+      };
+      
+      checkStatus();
+    }
+  }, []);
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 768);
@@ -181,6 +218,62 @@ export default function App() {
       p.desc.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesCat && matchesQuery;
   });
+
+  if (orderNsu) {
+    return (
+      <div className="min-h-screen bg-[#2C1B12] text-white flex flex-col items-center justify-center relative p-4 sm:p-6 text-center">
+        <Particles
+          particleColors={['#D4AF37', '#8B5A2B', '#E6C27A']}
+          particleCount={isMobile ? 30 : 100}
+          particleSpread={isMobile ? 10 : 15}
+          speed={0.05}
+          particleBaseSize={isMobile ? 40 : 80}
+          moveParticlesOnHover={!isMobile}
+          alphaParticles={true}
+          disableRotation={false}
+        />
+        <div className="bg-[#3A261A] p-8 sm:p-12 rounded-3xl shadow-2xl z-10 max-w-xl w-full flex flex-col items-center">
+          {isConfirmingPayment ? (
+            <>
+              <div className="w-20 h-20 mb-6 flex items-center justify-center">
+                <svg className="animate-spin text-[#D4A017] w-12 h-12" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+              </div>
+              <h2 className="text-2xl font-bold font-main mb-3 text-white">Confirmando seu pagamento...</h2>
+              <p className="text-[#E6D8C9] mb-8">Por favor, aguarde enquanto validamos o seu pagamento.</p>
+            </>
+          ) : orderStatus?.status === 'timeout' ? (
+            <>
+              <div className="w-20 h-20 mb-6 bg-red-500/10 text-red-400 rounded-full flex items-center justify-center border border-red-500/20">
+                <X className="w-10 h-10" />
+              </div>
+              <h2 className="text-2xl font-bold font-main mb-3 text-white">Tempo Esgotado</h2>
+              <p className="text-[#E6D8C9] mb-8">Não conseguimos confirmar o pagamento no momento. Caso tenha pago, fique tranquilo, nosso sistema processará em breve.</p>
+              <button onClick={() => window.location.href = '/'} className="px-8 py-4 bg-gradient-to-r from-[#D4A017] to-[#F2C94C] hover:brightness-110 text-white rounded-2xl font-bold uppercase tracking-widest transition-all w-full">Voltar para a Loja</button>
+            </>
+          ) : (
+            <>
+              <div className="w-20 h-20 mb-6 bg-emerald-500/10 text-emerald-400 rounded-full flex items-center justify-center border border-emerald-500/20">
+                <Check className="w-10 h-10" />
+              </div>
+              <h2 className="text-3xl font-bold font-main mb-3 text-white">Pagamento Confirmado!</h2>
+              <p className="text-[#E6D8C9] mb-4">Obrigado pela sua compra.</p>
+              <div className="bg-[#2C1B12] rounded-xl p-4 w-full mb-8 border border-white/5 text-left flex justify-between items-center">
+                <span className="text-[#E6D8C9] font-medium">Total pago:</span>
+                <span className="text-xl font-bold text-white">R$ {Number(orderStatus?.paid_amount || orderStatus?.total || 0).toFixed(2).replace('.', ',')}</span>
+              </div>
+              {orderStatus?.receipt_url && (
+                <a href={orderStatus.receipt_url} target="_blank" rel="noopener noreferrer" className="mb-6 block text-[#D4A017] hover:text-[#F2C94C] underline underline-offset-4">Ver Comprovante</a>
+              )}
+              <button onClick={() => window.location.href = '/'} className="px-8 py-4 bg-gradient-to-r from-[#D4A017] to-[#F2C94C] hover:brightness-110 text-white rounded-2xl font-bold uppercase tracking-widest transition-all w-full">Voltar para a Loja</button>
+            </>
+          )}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex flex-col selection:bg-brand-gold selection:text-brand-chocolate relative z-10">

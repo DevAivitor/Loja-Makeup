@@ -2,7 +2,6 @@ import express from 'express';
 import path from 'path';
 import { createServer as createViteServer } from 'vite';
 import cors from 'cors';
-import { MercadoPagoConfig, Preference } from 'mercadopago';
 import axios from 'axios';
 
 const app = express();
@@ -11,75 +10,10 @@ const PORT = 3000;
 app.use(cors());
 app.use(express.json());
 
-// -- MP Configuration --
-let mpClient: MercadoPagoConfig | null = null;
-function getMPClient() {
-  if (!mpClient) {
-    const token = process.env.MP_ACCESS_TOKEN;
-    if (!token) throw new Error('MP_ACCESS_TOKEN is missing');
-    mpClient = new MercadoPagoConfig({ accessToken: token });
-  }
-  return mpClient;
-}
-
 // -- API Routes --
 
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok' });
-});
-
-// Create Preference for Mercado Pago
-app.post('/api/checkout/preference', async (req, res) => {
-  try {
-    const client = getMPClient();
-    const preference = new Preference(client);
-    const { items, customer, orderId } = req.body;
-
-    const response = await preference.create({
-      body: {
-        items: items.map((item: any) => ({
-          id: String(item.id),
-          title: item.name,
-          quantity: item.qty,
-          unit_price: item.price,
-          currency_id: 'BRL',
-        })),
-        payer: {
-          email: customer.email,
-        },
-        external_reference: orderId,
-        back_urls: {
-          success: `${process.env.APP_URL}/success`,
-          failure: `${process.env.APP_URL}/failure`,
-          pending: `${process.env.APP_URL}/pending`
-        },
-        auto_return: 'approved',
-        notification_url: `${process.env.APP_URL}/api/checkout/webhook`,
-      }
-    });
-
-    res.json({ id: response.id, init_point: response.init_point });
-  } catch (error: any) {
-    console.error('Checkout error:', error);
-    res.status(500).json({ error: error.message });
-  }
-});
-
-// Mercado Pago Webhook for order updates
-app.post('/api/checkout/webhook', async (req, res) => {
-  try {
-    const { type, data } = req.body;
-    
-    // Process payment updates (in production we would update Firestore directly here
-    // or trigger an event if we had Firebase Admin SDK initialized)
-    // For now we just acknowledge the webhook.
-    console.log('Webhook received:', type, data);
-
-    res.status(200).send('OK');
-  } catch (error: any) {
-    console.error('Webhook error:', error);
-    res.status(500).send('Internal Server Error');
-  }
 });
 
 // Melhor Envio Shipping Calculation
