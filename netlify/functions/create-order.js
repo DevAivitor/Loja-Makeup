@@ -4,7 +4,7 @@ import { getStore } from "@netlify/blobs";
 // ============================================
 // ALTERE AQUI — preencha com seus dados reais
 // ============================================
-const INFINITE_TAG = "SUA_INFINITE_TAG_AQUI"; // Sua Infinite Tag da InfinitePay, SEM o símbolo $
+const INFINITE_TAG = "carolarisio"; // Sua Infinite Tag da InfinitePay, SEM o símbolo $
 const SITE_URL = "https://storemakeup.netlify.app"; // URL do seu site (troque se o domínio mudar)
 // ============================================
 
