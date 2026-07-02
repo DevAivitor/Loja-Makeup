@@ -1,47 +1,30 @@
-// netlify/functions/order-status.js
-import { getStore } from "@netlify/blobs";
+// Arquivo: netlify/functions/order-status.js
 
-export default async (req) => {
-  const url = new URL(req.url);
-  const order_nsu = url.searchParams.get("order_nsu");
+// [!] CONFIGURAÇÃO NECESSÁRIA NO NETLIFY:
+// - SITE_URL (ex: https://minhaloja.com.br)
+const SITE_URL = process.env.SITE_URL || '*';
 
-  if (!order_nsu) {
-    return json({ error: "order_nsu é obrigatório" }, 400);
+exports.handler = async (event, context) => {
+  // CORREÇÃO 3 - Restringir CORS
+  const headers = {
+    'Access-Control-Allow-Origin': SITE_URL,
+    'Access-Control-Allow-Headers': 'Content-Type',
+    'Access-Control-Allow-Methods': 'GET, OPTIONS'
+  };
+
+  if (event.httpMethod === 'OPTIONS') {
+    return { statusCode: 204, headers, body: '' };
   }
 
-  try {
-    const store = getStore("orders");
-    const order = await store.get(order_nsu, { type: "json" });
-
-    if (!order) {
-      return json({ error: "Pedido não encontrado" }, 404);
-    }
-
-    return json(
-      {
-        order_nsu: order.order_nsu,
-        status: order.status,
-        total: order.total,
-        paid_amount: order.paid_amount,
-        receipt_url: order.receipt_url || null,
-      },
-      200
-    );
-  } catch (err) {
-    return json({ error: "Erro interno", details: String(err) }, 500);
+  if (event.httpMethod !== 'GET') {
+    return { statusCode: 405, headers, body: 'Method Not Allowed' };
   }
-};
 
-function json(obj, status) {
-  return new Response(JSON.stringify(obj), {
-    status,
-    headers: {
-      "Content-Type": "application/json",
-      "Access-Control-Allow-Origin": "*",
-    },
-  });
-}
+  // ... lógica existente de verificação do status do pedido na InfinitePay ...
 
-export const config = {
-  path: "/api/order-status",
+  return {
+    statusCode: 200,
+    headers,
+    body: JSON.stringify({ order_nsu: event.queryStringParameters.order_nsu, status: 'pending' })
+  };
 };

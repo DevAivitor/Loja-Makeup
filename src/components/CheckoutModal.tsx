@@ -251,7 +251,7 @@ export default function CheckoutModal({ isOpen, onClose, cart, total, onSuccess 
         animate={{ scale: 1, opacity: 1, y: 0 }}
         exit={{ scale: 0.98, opacity: 0, y: 10 }}
         transition={{ duration: 0.3, ease: "easeOut" }}
-        className="relative w-full max-w-6xl h-full sm:h-auto max-h-full sm:max-h-[90vh] bg-[#2C1B12] sm:rounded-3xl shadow-2xl flex flex-col overflow-hidden mx-auto my-auto"
+        className="relative w-full max-w-6xl h-[100dvh] sm:h-[90vh] bg-[#2C1B12] sm:rounded-3xl shadow-2xl flex flex-col overflow-hidden mx-auto my-auto"
       >
         {/* Elegant Header */}
         <div className="flex items-center justify-between p-6 bg-[#3A261A] shadow-md z-20">
@@ -264,13 +264,13 @@ export default function CheckoutModal({ isOpen, onClose, cart, total, onSuccess 
           </button>
         </div>
 
-        <div className="flex flex-1 overflow-hidden flex-col lg:flex-row">
+        <div className="flex flex-1 overflow-hidden flex-col lg:flex-row min-h-0">
           
           {/* Main Content Area */}
-          <div className="flex-1 flex flex-col h-full overflow-hidden relative">
+          <div className="flex-1 flex flex-col h-full overflow-hidden relative min-h-0">
             
             {/* Modern Stepper */}
-            <div className="hidden sm:block px-10 py-8 border-b border-white/5">
+            <div className="hidden sm:block px-10 py-8 border-b border-white/5 shrink-0">
               <div className="flex items-center justify-between relative">
                 <div className="absolute left-0 top-1/2 -translate-y-1/2 w-full h-[2px] bg-white/10" />
                 {steps.map((s, i) => {
@@ -302,7 +302,7 @@ export default function CheckoutModal({ isOpen, onClose, cart, total, onSuccess 
                </div>
             </div>
 
-            <div className="checkout-content p-6 sm:p-10 custom-scrollbar">
+            <div className="checkout-content p-6 sm:p-10 custom-scrollbar min-h-0">
               <AnimatePresence mode="wait">
                 
                 {step === 'customer' && (
@@ -516,10 +516,10 @@ export default function CheckoutModal({ isOpen, onClose, cart, total, onSuccess 
             {/* Fixed Footer for Buttons */}
             {step !== 'success' && (
               <div className="checkout-footer bg-[#2C1B12] border-t border-white/5 z-20 shrink-0 lg:order-none order-last p-4 sm:p-6 lg:p-8">
-                <div className="max-w-2xl mx-auto flex flex-col-reverse sm:flex-row items-stretch sm:items-center gap-4">
+                <div className="max-w-2xl mx-auto flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-4">
                   {step === 'customer' && (
                     <button disabled={!name || cpf.length < 14 || phone.length < 14 || !email} onClick={() => setStep('method')}
-                      className="checkout-button w-full py-5 bg-gradient-to-r from-[#D4A017] to-[#F2C94C] hover:brightness-110 text-white rounded-2xl font-bold uppercase tracking-widest transition-all shadow-lg active:scale-[0.98] disabled:opacity-50 disabled:active:scale-100 flex items-center justify-center gap-3 text-lg"
+                      className="checkout-button w-full sm:w-auto sm:px-12 py-5 bg-gradient-to-r from-[#D4A017] to-[#F2C94C] hover:brightness-110 text-white rounded-2xl font-bold uppercase tracking-widest transition-all shadow-lg active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3 text-lg"
                     >
                       Continuar <ArrowRight className="w-5 h-5" />
                     </button>
@@ -581,12 +581,12 @@ export default function CheckoutModal({ isOpen, onClose, cart, total, onSuccess 
 
           {/* Premium Summary Sidebar */}
           {step !== 'success' && (
-            <div className="checkout-summary hidden lg:flex flex-col w-[420px] bg-[#3A261A] border-l border-white/5 z-10 shadow-2xl relative">
-               <div className="p-8 border-b border-white/5">
+            <div className="checkout-summary hidden lg:flex flex-col w-[420px] bg-[#3A261A] border-l border-white/5 z-10 shadow-2xl relative min-h-0">
+               <div className="p-8 border-b border-white/5 shrink-0">
                  <h3 className="font-main font-bold text-2xl text-white">Resumo da Compra</h3>
                </div>
                
-               <div className="flex-1 overflow-y-auto p-8 space-y-6 custom-scrollbar">
+               <div className="flex-1 overflow-y-auto p-8 space-y-6 custom-scrollbar min-h-0">
                  {cart.map(item => (
                    <div key={item.id} className="flex gap-5">
                      <div className="w-20 h-20 rounded-2xl bg-white/5 overflow-hidden border border-white/10 shrink-0">
@@ -607,7 +607,7 @@ export default function CheckoutModal({ isOpen, onClose, cart, total, onSuccess 
                  ))}
                </div>
 
-               <div className="p-8 bg-[#2C1B12]/50 border-t border-white/5 space-y-4">
+               <div className="p-8 bg-[#2C1B12]/50 border-t border-white/5 space-y-4 shrink-0">
                  <div className="flex justify-between text-base text-[#E6D8C9]">
                    <span>Subtotal</span>
                    <span className="font-medium">R$ {total.toFixed(2).replace('.', ',')}</span>
