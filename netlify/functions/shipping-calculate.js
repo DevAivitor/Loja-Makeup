@@ -45,7 +45,7 @@ export default async (req) => {
           Authorization: `Bearer ${MELHOR_ENVIO_TOKEN}`,
           Accept: "application/json",
           "Content-Type": "application/json",
-          "User-Agent": "Loja Makeup (contato@lojamakeup.com.br)", // troque pelo seu contato real, o Melhor Envio exige isso
+          "User-Agent": "vitorsori2@gmail.com", // troque pelo seu contato real, o Melhor Envio exige isso
         },
         body: JSON.stringify(payload),
       }
