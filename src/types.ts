@@ -18,6 +18,7 @@ export interface Order {
   deliveryMethod?: 'store' | 'delivery' | string;
   deliveryType?: 'pickup' | 'delivery' | string;
   address?: any;
+  deliveryAddress?: any;
   shippingDetails?: any;
   paymentMethod?: string;
   paymentId?: string;

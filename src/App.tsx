@@ -736,8 +736,8 @@ export default function App() {
         onClose={() => setCheckoutOpen(false)}
         cart={cart}
         total={cart.reduce((sum, item) => sum + item.qty * 10, 0)}
-        onSuccess={(orderData) => {
-          saveOrder(orderData);
+        onSuccess={async (orderData) => {
+          await saveOrder(orderData);
           setCart([]);
           setCheckoutOpen(false);
           triggerToast('🎉 Pedido realizado com sucesso!');

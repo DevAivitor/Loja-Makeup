@@ -160,7 +160,8 @@ export function useStoreData() {
         deliveryType: orderData.deliveryType || (orderData.deliveryMethod === 'store' ? 'pickup' : 'delivery'),
         ...(orderData.address && { address: orderData.address }),
         ...(orderData.shippingDetails && { shippingDetails: orderData.shippingDetails }),
-        ...(orderData.paymentMethod && { paymentMethod: orderData.paymentMethod })
+        ...(orderData.paymentMethod && { paymentMethod: orderData.paymentMethod }),
+        ...('deliveryAddress' in orderData && { deliveryAddress: orderData.deliveryAddress })
       });
     } catch (error) {
       handleFirestoreError(error, OperationType.CREATE, `orders/${Date.now()}`);
