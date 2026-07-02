@@ -1,30 +1,60 @@
-// Arquivo: netlify/functions/order-status.js
+// netlify/functions/order-status.js
+import admin from "firebase-admin";
 
-// [!] CONFIGURAÇÃO NECESSÁRIA NO NETLIFY:
-// - SITE_URL (ex: https://minhaloja.com.br)
-const SITE_URL = process.env.SITE_URL || '*';
+if (!admin.apps.length) {
+  admin.initializeApp({
+    credential: admin.credential.cert({
+      projectId: process.env.FIREBASE_PROJECT_ID,
+      clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+      privateKey: (process.env.FIREBASE_PRIVATE_KEY || "").replace(/\\n/g, "\n"),
+    }),
+  });
+}
 
-exports.handler = async (event, context) => {
-  // CORREÇÃO 3 - Restringir CORS
-  const headers = {
-    'Access-Control-Allow-Origin': SITE_URL,
-    'Access-Control-Allow-Headers': 'Content-Type',
-    'Access-Control-Allow-Methods': 'GET, OPTIONS'
-  };
+const db = admin.firestore();
 
-  if (event.httpMethod === 'OPTIONS') {
-    return { statusCode: 204, headers, body: '' };
+export default async (req) => {
+  const url = new URL(req.url);
+  const order_nsu = url.searchParams.get("order_nsu");
+
+  if (!order_nsu) {
+    return json({ error: "order_nsu é obrigatório" }, 400);
   }
 
-  if (event.httpMethod !== 'GET') {
-    return { statusCode: 405, headers, body: 'Method Not Allowed' };
+  try {
+    const orderSnap = await db.collection("orders").doc(order_nsu).get();
+
+    if (!orderSnap.exists) {
+      return json({ error: "Pedido não encontrado" }, 404);
+    }
+
+    const order = orderSnap.data();
+
+    return json(
+      {
+        order_nsu: order.order_nsu,
+        status: order.status,
+        total: order.total,
+        paid_amount: order.paid_amount || null,
+        receipt_url: order.receipt_url || null,
+      },
+      200
+    );
+  } catch (err) {
+    return json({ error: "Erro interno", details: String(err) }, 500);
   }
+};
 
-  // ... lógica existente de verificação do status do pedido na InfinitePay ...
+function json(obj, status) {
+  return new Response(JSON.stringify(obj), {
+    status,
+    headers: {
+      "Content-Type": "application/json",
+      "Access-Control-Allow-Origin": "*",
+    },
+  });
+}
 
-  return {
-    statusCode: 200,
-    headers,
-    body: JSON.stringify({ order_nsu: event.queryStringParameters.order_nsu, status: 'pending' })
-  };
+export const config = {
+  path: "/api/order-status",
 };
