@@ -1,38 +1,49 @@
-// Arquivo: netlify/functions/webhook.js
+// netlify/functions/webhook.js
+const { db } = require('./_firebaseAdmin');
 
-// [!] CONFIGURAÇÃO NECESSÁRIA NO NETLIFY:
-// Adicione a variável WEBHOOK_SECRET em: Site settings -> Environment variables.
-// O mesmo valor deve ser configurado na InfinitePay como header ou query param (ex: ?secret=SEU_SEGREDO)
+// ============================================
+// ALTERE AQUI — use a MESMA senha configurada em WEBHOOK_SECRET (variável de ambiente no Netlify)
+// ============================================
 const WEBHOOK_SECRET = process.env.WEBHOOK_SECRET;
 
-exports.handler = async (event, context) => {
-  // CORREÇÃO 1 - Validar autenticidade do webhook
-  const providedSecret = event.headers['x-webhook-secret'] || (event.queryStringParameters && event.queryStringParameters.secret);
-  
-  if (!WEBHOOK_SECRET || providedSecret !== WEBHOOK_SECRET) {
-    console.error('Tentativa de webhook não autorizada ou WEBHOOK_SECRET não configurado.');
-    return {
-      statusCode: 401,
-      body: JSON.stringify({ error: 'Unauthorized webhook call' })
-    };
+exports.handler = async (event) => {
+  if (event.httpMethod !== 'POST') {
+    return { statusCode: 405, body: JSON.stringify({ error: 'Método não permitido' }) };
   }
 
-  if (event.httpMethod !== 'POST') {
-    return { statusCode: 405, body: 'Method Not Allowed' };
+  // ---- Valida se a chamada realmente veio autorizada ----
+  const params = event.queryStringParameters || {};
+  if (!WEBHOOK_SECRET || params.secret !== WEBHOOK_SECRET) {
+    return { statusCode: 401, body: JSON.stringify({ error: 'Não autorizado' }) };
   }
 
   try {
-    const payload = JSON.parse(event.body);
-    // ... lógica existente para atualizar o status do pedido para "pago" ...
-    
-    return {
-      statusCode: 200,
-      body: JSON.stringify({ received: true })
-    };
-  } catch (error) {
-    return {
-      statusCode: 400,
-      body: JSON.stringify({ error: 'Invalid payload' })
-    };
+    const payload = JSON.parse(event.body || '{}');
+    const { order_nsu, transaction_nsu, paid_amount, receipt_url } = payload;
+
+    if (!order_nsu) {
+      return { statusCode: 400, body: JSON.stringify({ error: 'order_nsu ausente no webhook' }) };
+    }
+
+    const orderRef = db.collection('orders').doc(order_nsu);
+    const orderSnap = await orderRef.get();
+
+    if (!orderSnap.exists) {
+      // responde 200 mesmo assim pra InfinitePay não ficar reenviando
+      return { statusCode: 200, body: JSON.stringify({ received: true, warning: 'pedido não encontrado' }) };
+    }
+
+    await orderRef.update({
+      status: 'Pago',
+      transaction_nsu: transaction_nsu || null,
+      paid_amount: paid_amount || null,
+      receipt_url: receipt_url || null,
+      paidAt: new Date().toLocaleString('pt-BR'),
+    });
+
+    return { statusCode: 200, body: JSON.stringify({ received: true }) };
+  } catch (err) {
+    console.error('webhook error:', err);
+    return { statusCode: 500, body: JSON.stringify({ error: 'Erro interno', details: String(err) }) };
   }
 };
