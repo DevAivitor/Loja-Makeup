@@ -1,9 +1,13 @@
 // netlify/functions/webhook.js
-import admin from "firebase-admin";
+import { initializeApp, cert, getApps } from "firebase-admin/app";
+import { getFirestore, FieldValue } from "firebase-admin/firestore";
 
-if (!admin.apps.length) {
-  admin.initializeApp({
-    credential: admin.credential.cert({
+// ID do banco de dados Firestore (não é o "(default)" — este projeto usa um banco nomeado)
+const FIRESTORE_DATABASE_ID = "ai-studio-8a527d65-fcd2-4834-8f27-aba88318ffb8";
+
+if (!getApps().length) {
+  initializeApp({
+    credential: cert({
       projectId: process.env.FIREBASE_PROJECT_ID,
       clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
       privateKey: (process.env.FIREBASE_PRIVATE_KEY || "").replace(/\\n/g, "\n"),
@@ -11,7 +15,7 @@ if (!admin.apps.length) {
   });
 }
 
-const db = admin.firestore();
+const db = getFirestore(FIRESTORE_DATABASE_ID);
 
 export default async (req) => {
   if (req.method !== "POST") {
@@ -38,7 +42,7 @@ export default async (req) => {
       transaction_nsu: transaction_nsu || null,
       paid_amount: paid_amount || null,
       receipt_url: receipt_url || null,
-      paidAt: admin.firestore.FieldValue.serverTimestamp(),
+      paidAt: FieldValue.serverTimestamp(),
     });
 
     return json({ received: true }, 200);
