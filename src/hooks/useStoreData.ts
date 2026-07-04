@@ -147,27 +147,6 @@ export function useStoreData() {
     }
   };
 
-  const saveOrder = async (orderData: Omit<Order, 'id' | 'date' | 'firebaseId'>) => {
-    try {
-      const orderId = String(Date.now());
-      await setDoc(doc(db, 'orders', orderId), {
-        date: new Date().toLocaleString('pt-BR'),
-        items: orderData.items,
-        total: orderData.total,
-        status: orderData.status,
-        customer: orderData.customer || 'Cliente',
-        deliveryMethod: orderData.deliveryMethod || 'store',
-        deliveryType: orderData.deliveryType || (orderData.deliveryMethod === 'store' ? 'pickup' : 'delivery'),
-        ...(orderData.address && { address: orderData.address }),
-        ...(orderData.shippingDetails && { shippingDetails: orderData.shippingDetails }),
-        ...(orderData.paymentMethod && { paymentMethod: orderData.paymentMethod }),
-        ...('deliveryAddress' in orderData && { deliveryAddress: orderData.deliveryAddress })
-      });
-    } catch (error) {
-      handleFirestoreError(error, OperationType.CREATE, `orders/${Date.now()}`);
-    }
-  };
-
   const updateOrderStatus = async (orderId: string, newStatus: string) => {
     try {
       await updateDoc(doc(db, 'orders', orderId), { status: newStatus });
@@ -219,7 +198,6 @@ export function useStoreData() {
     updateProduct,
     deleteProduct,
     saveSettings,
-    saveOrder,
     updateOrderStatus,
     addCategory,
     updateCategory,

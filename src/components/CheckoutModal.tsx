@@ -17,7 +17,7 @@ interface CheckoutModalProps {
   onClose: () => void;
   cart: CartItem[];
   total: number;
-  onSuccess: (orderData: { items: string[]; total: number; status: string; customer: any; deliveryMethod: string; deliveryType?: string; address?: any; shippingDetails?: any; paymentMethod?: string; deliveryAddress?: any; }) => Promise<void> | void;
+  onSuccess: () => Promise<void> | void;
 }
 
 type CheckoutStep = 'customer' | 'method' | 'address' | 'shipping' | 'payment' | 'success';
@@ -220,18 +220,7 @@ export default function CheckoutModal({ isOpen, onClose, cart, total, onSuccess 
       
       const data = await response.json();
       if (data.checkout_url) {
-        // Save order to Firestore first
-        const orderData = {
-          items: cart.map(c => `${c.qty}x ${c.name}`),
-          total: total + (deliveryMethod !== 'store' ? Number(selectedShipping?.price || shippingCost) : 0),
-          status: 'Aguardando Pagamento',
-          customer: { name, phone, cpf, email },
-          deliveryMethod,
-          ...(deliveryMethod !== 'store' && {
-            deliveryAddress: { street, number, complement, neighborhood, city, state, cep }
-          })
-        };
-        await onSuccess(orderData);
+        await onSuccess();
         
         window.location.href = data.checkout_url;
       } else {

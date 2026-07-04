@@ -41,7 +41,6 @@ export default function App() {
     updateProduct,
     deleteProduct,
     saveSettings,
-    saveOrder,
     addCategory,
     updateCategory,
     deleteCategory,
@@ -736,8 +735,7 @@ export default function App() {
         onClose={() => setCheckoutOpen(false)}
         cart={cart}
         total={cart.reduce((sum, item) => sum + item.qty * 10, 0)}
-        onSuccess={async (orderData) => {
-          await saveOrder(orderData);
+        onSuccess={() => {
           setCart([]);
           setCheckoutOpen(false);
           triggerToast('🎉 Pedido realizado com sucesso!');
