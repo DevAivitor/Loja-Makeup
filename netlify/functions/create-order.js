@@ -11,9 +11,9 @@ const { db } = require('./_firebaseAdmin');
 // WEBHOOK_SECRET = uma senha longa e aleatória, inventada por você
 // FIREBASE_PROJECT_ID, FIREBASE_CLIENT_EMAIL, FIREBASE_PRIVATE_KEY = da chave de serviço do Firebase
 // ============================================
-const SITE_URL = process.env.SITE_URL;illustrious-nougat-721b23.netlify.app
-const INFINITE_TAG = process.env.INFINITE_TAG;carolarisio
-const WEBHOOK_SECRET = process.env.WEBHOOK_SECRET;santosyo89
+const SITE_URL = process.env.SITE_URL;
+const INFINITE_TAG = process.env.INFINITE_TAG;
+const WEBHOOK_SECRET = process.env.WEBHOOK_SECRET;
 
 const PRODUCT_PRICE_CENTS = 1000; // R$10,00 — travado no servidor
 const MOTOBOY_FEE_CENTS = 500; // R$5,00 — travado no servidor
